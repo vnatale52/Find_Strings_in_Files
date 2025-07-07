@@ -33,16 +33,16 @@
 
                 <form action="/buscar" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="search_strings" class="form-label"><strong>Palabras, frases, cadenas de texto, números a buscar (separados entre sí por un punto y coma ) : </strong></label>
+                        <label for="search_strings" class="form-label"><strong>Ingresa las palabras, frases, cadenas de texto, números a buscar (separados entre sí por un punto y coma ) : </strong></label>
                         <input type="text" class="form-control" id="search_strings" name="search_strings" required>
                     </div>
                     <div class="mb-3">
                         <label for="files" class="form-label"><strong>Selecciona los archivos : </strong></label>
                         <input class="form-control" type="file" id="files" name="files" multiple required>
-                        <div class="form-text">Puedes seleccionar múltiples archivos, cuyo contenido sea necesariamente texto y cuyas s extensiones sean del tipo: txt, pdf, xls, xlsx, docx. No soporta archivos MS Word antiguos que sean .doc (conviértelo previamente a .docx, que sí está soportado), ni archivos gráficos, imágenes ni copias escaneadas. El contenido de los archivos seleccionados, para que la búsqueda sea realizada, viaja por Internet, con sus riesgos inherentes. Hay un límite en el tamaño total de archivos, dado que no he contratado un servicio pago (se trata de un server de desarollo y gratuito). Under Construction and Testing.</div>
+                        <div class="form-text">Puedes seleccionar múltiples archivos, cuyo contenido sea necesariamente texto y cuyas extensiones sean del tipo: txt, pdf, xls, xlsx, docx (otras extensiones no están soportadas). No soporta archivos MS Word en formato antiguo que sean .doc (conviértelo previamente a .docx, que sí está soportado), ni archivos gráficos, imágenes ni copias escaneadas. El contenido de los archivos seleccionados, para que la búsqueda pueda ser realizada, viaja por Internet, con los riesgos de seguridad que ello implica. Hay un límite en el tamaño total de archivos a procesar, dado que no he contratado un servicio pago (se trata de un server de desarrollo y gratuito). Under Construction and Testing.</div>
                     </div>
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Buscar Ahora</button>
+                        <button type="submit" class="btn btn-primary btn-lg">Busca ahora ! </button>
                     </div>
                 </form>
             </div>
