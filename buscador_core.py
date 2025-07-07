@@ -1,13 +1,15 @@
 import os
-import io # Importante para manejar strings como si fueran archivos
-import fitz
-import docx
+import io
+import fitz  # PyMuPDF
+import docx  # python-docx
 import openpyxl
+from openpyxl.utils import get_column_letter
 import xlrd
 
-# --- Todas las funciones procesar_* (procesar_pdf, procesar_docx, etc.) se mantienen exactamente igual ---
-# (Puedes copiarlas del script anterior)
 def procesar_pdf(ruta_archivo, lista_strings):
+    """
+    Procesa un único archivo PDF, devolviendo hallazgos y problemas.
+    """
     hallazgos, problemas = [], []
     nombre_base = os.path.basename(ruta_archivo)
     try:
@@ -15,13 +17,16 @@ def procesar_pdf(ruta_archivo, lista_strings):
         if not documento.page_count:
             problemas.append(f"Archivo: '{nombre_base}' -> ERROR: El PDF está vacío o corrupto (0 páginas).")
             return hallazgos, problemas
+
         documento_sin_texto = all(not pagina.get_text("text").strip() for pagina in documento)
         if documento_sin_texto:
-            problemas.append(f"Archivo: '{nombre_base}' -> ADVERTENCIA: El documento PDF parece contener solo imágenes.")
+            problemas.append(f"Archivo: '{nombre_base}' -> ADVERTENCIA: El documento PDF parece contener solo imágenes y no tiene texto extraíble.")
             documento.close()
             return hallazgos, problemas
+
         for num_pagina, pagina in enumerate(documento, start=1):
             for string_a_buscar in lista_strings:
+                # La sintaxis ':=' (operador morsa) asigna y comprueba en un solo paso
                 if ocurrencias := pagina.search_for(string_a_buscar):
                     hallazgos.append(f"Archivo: '{nombre_base}', Página: {num_pagina} -> Encontrado: '{string_a_buscar}' ({len(ocurrencias)} ocurrencia(s)).")
         documento.close()
@@ -30,6 +35,10 @@ def procesar_pdf(ruta_archivo, lista_strings):
     return hallazgos, problemas
 
 def procesar_docx(ruta_archivo, lista_strings):
+    """
+    Procesa un archivo .docx. NOTA: No es posible obtener el nº de página de forma fiable,
+    por lo que se informa el nº de párrafo, que es la mejor localización posible.
+    """
     hallazgos, problemas = [], []
     nombre_base = os.path.basename(ruta_archivo)
     try:
@@ -44,24 +53,71 @@ def procesar_docx(ruta_archivo, lista_strings):
     return hallazgos, problemas
 
 def procesar_excel(ruta_archivo, lista_strings):
-    # (Esta función también se mantiene igual, la omito por brevedad)
+    """
+    Procesa un archivo Excel (.xlsx o .xls), buscando en todas las celdas de texto.
+    """
     hallazgos, problemas = [], []
-    # ... código de procesar_excel ...
+    nombre_base = os.path.basename(ruta_archivo)
+    try:
+        # Procesar archivos .xlsx (formato moderno)
+        if ruta_archivo.lower().endswith('.xlsx'):
+            wb = openpyxl.load_workbook(ruta_archivo, data_only=True) # data_only=True para obtener valores de fórmulas
+            for nombre_hoja in wb.sheetnames:
+                hoja = wb[nombre_hoja]
+                for fila_idx, fila in enumerate(hoja.iter_rows(), start=1):
+                    for col_idx, celda in enumerate(fila, start=1):
+                        # Solo buscar en celdas con valor de tipo string
+                        if celda.value and isinstance(celda.value, str):
+                            for string_a_buscar in lista_strings:
+                                if string_a_buscar.lower() in celda.value.lower():
+                                    conteo = celda.value.lower().count(string_a_buscar.lower())
+                                    celda_ref = f"{get_column_letter(col_idx)}{fila_idx}"
+                                    mensaje = f"Archivo: '{nombre_base}', Hoja: '{nombre_hoja}', Celda: {celda_ref} -> Encontrado: '{string_a_buscar}' ({conteo} ocurrencia(s))."
+                                    hallazgos.append(mensaje)
+        # Procesar archivos .xls (formato antiguo)
+        elif ruta_archivo.lower().endswith('.xls'):
+            wb = xlrd.open_workbook(ruta_archivo)
+            for nombre_hoja in wb.sheet_names():
+                hoja = wb.sheet_by_name(nombre_hoja)
+                for fila_idx in range(hoja.nrows):
+                    for col_idx in range(hoja.ncols):
+                        # Convertir siempre a string para una búsqueda segura
+                        valor_celda = str(hoja.cell_value(fila_idx, col_idx))
+                        for string_a_buscar in lista_strings:
+                            if string_a_buscar.lower() in valor_celda.lower():
+                                conteo = valor_celda.lower().count(string_a_buscar.lower())
+                                # Aproximación de la referencia de celda
+                                celda_ref = f"{chr(65+col_idx)}{fila_idx+1}"
+                                mensaje = f"Archivo: '{nombre_base}', Hoja: '{nombre_hoja}', Celda: ~{celda_ref} -> Encontrado: '{string_a_buscar}' ({conteo} ocurrencia(s))."
+                                hallazgos.append(mensaje)
+    except Exception as e:
+        problemas.append(f"Archivo: '{nombre_base}' -> ERROR: No se pudo procesar. Razón: {e}")
     return hallazgos, problemas
 
 def procesar_txt(ruta_archivo, lista_strings):
-    # (Esta función también se mantiene igual, la omito por brevedad)
+    """
+    Procesa un archivo de texto plano (.txt).
+    """
     hallazgos, problemas = [], []
-    # ... código de procesar_txt ...
+    nombre_base = os.path.basename(ruta_archivo)
+    try:
+        # Abrir con encoding utf-8 y manejar errores para máxima compatibilidad
+        with open(ruta_archivo, 'r', encoding='utf-8', errors='ignore') as f:
+            for num_linea, linea in enumerate(f, start=1):
+                for string_a_buscar in lista_strings:
+                    if string_a_buscar.lower() in linea.lower():
+                        conteo = linea.lower().count(string_a_buscar.lower())
+                        mensaje = f"Archivo: '{nombre_base}', Línea: {num_linea} -> Encontrado: '{string_a_buscar}' ({conteo} ocurrencia(s))."
+                        hallazgos.append(mensaje)
+    except Exception as e:
+        problemas.append(f"Archivo: '{nombre_base}' -> ERROR: No se pudo procesar. Razón: {e}")
     return hallazgos, problemas
 
 
-# *** CAMBIO IMPORTANTE AQUÍ ***
 def generar_informe(carpeta_entrada, lista_strings):
     """
     Función principal que busca en los archivos y DEVUELVE el informe como string.
     """
-    # ... (el resto de la lógica de búsqueda es igual) ...
     hallazgos_totales, archivos_problematicos, archivos_ignorados = [], [], []
     archivos_procesados = 0
     extensiones_soportadas = ('.pdf', '.docx', '.xlsx', '.xls', '.txt')
@@ -72,16 +128,21 @@ def generar_informe(carpeta_entrada, lista_strings):
             extension = os.path.splitext(nombre_archivo)[1].lower()
             if extension in extensiones_soportadas:
                 archivos_procesados += 1
-                if extension == '.pdf': hallazgos, problemas = procesar_pdf(ruta_completa, lista_strings)
-                elif extension == '.docx': hallazgos, problemas = procesar_docx(ruta_completa, lista_strings)
-                elif extension in ['.xlsx', '.xls']: hallazgos, problemas = procesar_excel(ruta_completa, lista_strings)
-                elif extension == '.txt': hallazgos, problemas = procesar_txt(ruta_completa, lista_strings)
+                if extension == '.pdf':
+                    hallazgos, problemas = procesar_pdf(ruta_completa, lista_strings)
+                elif extension == '.docx':
+                    hallazgos, problemas = procesar_docx(ruta_completa, lista_strings)
+                elif extension in ['.xlsx', '.xls']:
+                    hallazgos, problemas = procesar_excel(ruta_completa, lista_strings)
+                elif extension == '.txt':
+                    hallazgos, problemas = procesar_txt(ruta_completa, lista_strings)
+                
                 hallazgos_totales.extend(hallazgos)
                 archivos_problematicos.extend(problemas)
             else:
                 archivos_ignorados.append(nombre_archivo)
 
-    # *** En lugar de escribir a un archivo, escribimos a un string en memoria ***
+    # Escribimos a un objeto de string en memoria para devolverlo al final
     output = io.StringIO()
     output.write("="*30 + " INFORME DE BÚSQUEDA " + "="*30 + "\n")
     output.write(f"Textos Buscados: {lista_strings}\n")
