@@ -12,7 +12,7 @@ app.config['SECRET_KEY'] = 'una-clave-secreta-muy-dificil-de-adivinar'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # Límite de 32 MB para el total de archivos
 
-# Asegurarse de que la carpeta de subidas existe
+# Asegurarse de que la carpeta a subir existe
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
@@ -41,7 +41,7 @@ def buscar():
         flash('Debes seleccionar al menos un archivo.', 'danger')
         return redirect(url_for('index'))
 
-    lista_strings = [s.strip() for s in search_strings_raw.split(',') if s.strip()]
+    lista_strings = [s.strip() for s in search_strings_raw.split(';') if s.strip()]
 
     # Crear una carpeta temporal única para esta búsqueda
     temp_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()))
