@@ -15,7 +15,7 @@
     <div class="container">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h1 class="card-title text-center mb-4">Buscador simultánea de múltiples cadenas de texto en varios formatos de archivo. Por Vincenzo Natale, vnatale52@gmail.com</h1>
+                <h1 class="card-title text-center mb-4">Buscador simultáneo de múltiples cadenas de texto en varios formatos de archivo. Por Vincenzo Natale, vnatale52@gmail.com</h1>
                 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -27,7 +27,7 @@
 
                 <form action="/buscar" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="search_strings" class="form-label"><strong>Palabras, frases, cadena de texto, números a buscar (separados por punto y coma ) : </strong></label>
+                        <label for="search_strings" class="form-label"><strong>Palabras, frases, cadena de texto, números a buscar (separados entre sí por punto y coma ) : </strong></label>
                         <input type="text" class="form-control" id="search_strings" name="search_strings" required>
                     </div>
                     <div class="mb-3">
