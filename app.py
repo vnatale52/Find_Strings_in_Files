@@ -10,7 +10,7 @@ from buscador_core import generar_informe
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'una-clave-secreta-muy-dificil-de-adivinar'
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # Límite de 32 MB para el total de archivos
+app.config['MAX_CONTENT_LENGTH'] = 128 * 1024 * 1024  # Límite de 32 MB para el total de archivos cambiado a 128 MB
 
 # Asegurarse de que la carpeta a subir existe
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
