@@ -15,7 +15,7 @@
     <div class="container">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h1 class="card-title text-center mb-4">Buscador de Texto en Archivos</h1>
+                <h1 class="card-title text-center mb-4">Buscador simultánea de múltiples cadenas de texto en varios formatos de archivo. Por Vincenzo Natale, vnatale52@gmail.com</h1>
                 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -27,13 +27,13 @@
 
                 <form action="/buscar" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="search_strings" class="form-label"><strong>Textos a buscar (separados por comas)</strong></label>
+                        <label for="search_strings" class="form-label"><strong>Palabras, frases, cadena de texto, números a buscar (separados por punto y coma ) : </strong></label>
                         <input type="text" class="form-control" id="search_strings" name="search_strings" required>
                     </div>
                     <div class="mb-3">
-                        <label for="files" class="form-label"><strong>Selecciona los archivos</strong></label>
+                        <label for="files" class="form-label"><strong>Selecciona los archivos : </strong></label>
                         <input class="form-control" type="file" id="files" name="files" multiple required>
-                        <div class="form-text">Puedes seleccionar múltiples archivos (pdf, docx, xlsx, xls, txt).</div>
+                        <div class="form-text">Puedes seleccionar múltiples archivos cuyo contenido sea texto (pdf, docx, xlsx, xls, txt) . No soporta archivos gráficos, imágenes y copias escaneadas.</div>
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">Buscar Ahora</button>
